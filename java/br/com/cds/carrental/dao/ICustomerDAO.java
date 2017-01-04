@@ -17,6 +17,8 @@ public interface ICustomerDAO<T, PK extends Serializable> {
 	
 	List<T> findByCnpj(String cnpj);
 	
+	List<T> findExactCpf(String cpf);
+	
 	List<T> findAll();
 
 }

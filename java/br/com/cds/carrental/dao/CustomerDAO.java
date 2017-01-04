@@ -68,4 +68,12 @@ public class CustomerDAO implements ICustomerDAO<Customer, Long> {
 		return query.getResultList();
 	}
 
+	@Override
+	public List<Customer> findExactCpf(String cpf) {
+		TypedQuery<Customer> query = entityManager
+				.createQuery("from Customer c where c.cpf ='"+cpf+"'", Customer.class);		
+		//query.setParameter("cpf",  cpf );
+		return  query.getResultList();		
+	}
+
 }

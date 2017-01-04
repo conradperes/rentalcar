@@ -17,33 +17,41 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
-import br.com.cds.carrental.dao.CustomerDAO;
-import br.com.cds.carrental.dao.ICustomerDAO;
-import br.com.cds.carrental.domain.Customer;
+import br.com.cds.carrental.dao.CarDAO;
+import br.com.cds.carrental.dao.ICarDAO;
+import br.com.cds.carrental.dao.IRentCarDAO;
+import br.com.cds.carrental.dao.RentalCarDAO;
+import br.com.cds.carrental.domain.Car;
+import br.com.cds.carrental.domain.RentCar;
 
-@Path("/customers")
-public class CustomerResource {
+@Path("/rentacar")
+public class RentCarResource {
 
-	private static final Logger LOGGER = Logger.getLogger(CustomerResource.class);
+	private static final Logger LOGGER = Logger.getLogger(RentCarResource.class);
 
-	private ICustomerDAO<Customer, Long> dao;
+	private IRentCarDAO<RentCar, Long> dao;
+	private ICarDAO<Car, Long> carDao;
 
-	public CustomerResource() {
-		this.dao = new CustomerDAO();
+	public RentCarResource() {
+		this.dao = new RentalCarDAO();
+		this.carDao = new CarDAO();
 	}
 
 	@POST
 	@Consumes({MediaType.APPLICATION_JSON})
-	public Response save(Customer customer) {
+	public Response save(RentCar rentCar) {
 		try {
-			if(customer.getCpf()!=null && dao.findExactCpf(customer.getCpf()).isEmpty())
-				dao.save(customer);
-			else
-				return Response.status(226).entity("CPF já existe, favor escolha outro cpf, para o cliente:"+customer.toString()).build();
+//			if(dao.findRent(rentCar.getCustomer().getId(),
+//					rentCar.getCar().getId(),
+//					rentCar.getCar().getRentalDate(),
+//					rentCar.getCar().getReturnDate()).isEmpty())
+				dao.save(rentCar);
+//			else
+//				return Response.status(226).entity("This car is already rented, please chose another car:"+rentCar.toString()).build();
 			
 			return Response
 					.status(200)
-					.entity("Registro inserido: " + customer.toString())
+					.entity("Registro inserido: " + rentCar.toString())
 					.build();	
 			
 		} catch (Exception ex) {
@@ -54,10 +62,10 @@ public class CustomerResource {
 
 	@PUT
 	@Consumes({MediaType.APPLICATION_JSON})
-	public Response update(Customer customer) {
+	public Response update(RentCar rent) {
 		try {
 			
-			dao.update(customer);
+			dao.update(rent);
 			
 			return Response
 					.status(200)
@@ -96,10 +104,10 @@ public class CustomerResource {
 	@GET
 	@Path("/{id}")
 	@Produces({MediaType.APPLICATION_JSON})
-	public Customer findById(@PathParam("id") Long id) {
+	public Car findById(@PathParam("id") Long id) {
 		try {
 
-			return dao.findById(id);
+			return carDao.findById(id);
 			
 		} catch (Exception ex) {
 			LOGGER.error(ex);
@@ -109,7 +117,7 @@ public class CustomerResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Customer> findAll() {
+	public List<RentCar> findAll() {
 		try {
 			
 			return dao.findAll(); 
@@ -123,7 +131,7 @@ public class CustomerResource {
 	@GET
 	@Path("/xml")
 	@Produces(MediaType.APPLICATION_XML)
-	public List<Customer> findAllXML() {
+	public List<RentCar> findAllXML() {
 		try {
 			
 			return dao.findAll(); 
@@ -134,15 +142,15 @@ public class CustomerResource {
 		}
 	}
 	@GET
-	@Path("/cpf/{cpf}")
+	@Path("/name/{name}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response findByCpf(@PathParam("cpf") String cpf) {
-		LOGGER.info("NAME : " + cpf);
+	public Response findByCustomer(@PathParam("name") String name) {
+		LOGGER.info("NAME : " + name);
 		try {
 			
-			List<Customer> customers = dao.findByCpf(cpf);
+			List<RentCar> rent = dao.findByCustomer(name);
 			
-			GenericEntity<List<Customer>> entities = new GenericEntity<List<Customer>>(customers) {};
+			GenericEntity<List<RentCar>> entities = new GenericEntity<List<RentCar>>(rent) {};
 			
 			return Response
 					.ok(entities)
@@ -154,24 +162,5 @@ public class CustomerResource {
 		}
 	}
 	
-	@GET
-	@Path("/cnpj/{cnpj}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response findByCnpj(@PathParam("cnpj") String cnpj) {
-		LOGGER.info("NAME : " + cnpj);
-		try {
-			
-			List<Customer> customers = dao.findByCnpj(cnpj);
-			
-			GenericEntity<List<Customer>> entities = new GenericEntity<List<Customer>>(customers) {};
-			
-			return Response
-					.ok(entities)
-					.build();
-			
-		} catch (Exception ex) {
-			LOGGER.error(ex);
-			throw new WebApplicationException(500);
-		}
-	}
+	
 }
